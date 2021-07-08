@@ -287,7 +287,11 @@ void thread01() {
 			
 		OperationInfo message;
 		message.operation_type = data_get.info.operation_type;
-		strcpy(message.path, data_get.info.path);
+		
+		CString _path_ = data_get.info.path;
+		if(_path_.Find("\\Device\\HarddiskVolume2\\") != -1)
+			_path_.Replace("\\Device\\HarddiskVolume2\\", "C:\\");
+		strcpy(message.path, _path_);
 		message.process_id = data_get.info.process_id;
 		strcpy(message.time, data_get.info.time);
 		strcpy(message.user, data_get.info.user);
@@ -305,7 +309,7 @@ void thread01() {
 		pLogin->list_record.InsertItem(row, "");
 		pLogin->list_record.SetItemText(row, 0, szNum);
 		pLogin->list_record.SetItemText(row, 1, message.operation_type == 1 ? "Create" : "Write");
-		pLogin->list_record.SetItemText(row, 2, message.path);
+		pLogin->list_record.SetItemText(row, 2, _path_);
 		pLogin->list_record.SetItemText(row, 3, message.user);
 		sprintf(szNum, "%d", data_get.info.process_id);
 		pLogin->list_record.SetItemText(row, 4, szNum);

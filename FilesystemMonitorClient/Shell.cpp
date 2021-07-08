@@ -184,18 +184,14 @@ void Shell::RefreshEditRule() {
 		
 		int index = rules_str.Find(" ");
 		CString _title = rules_str.Left(index);
-		// MessageBox(_title);
-		CString _rule = rules_str.Right(rules_str.GetLength() - index);
+		CString _rule = rules_str.Right(rules_str.GetLength() - index -1);
 
 		CString _user = _rule.Left(_rule.Find(" "));
-		CString _path = _rule.Right(_rule.GetLength() -_rule.Find(" "));
+		CString _path = _rule.Right(_rule.GetLength() -_rule.Find(" ") - 1);
 		strcpy(command_msg.rules[num_rules].user, _user);
-		_path.Replace("C:", "\\Device\\HarddiskVolume");
+		_path.Replace("C:", "\\Device\\HarddiskVolume2");
 		_path.Replace("/", "\\");
 		strcpy(command_msg.rules[num_rules].path, _path);
-
-		pLogin->Client_SendMessage((PVOID)&command_msg);
-		
 		char szNum[32] = { '\0' };
 		sprintf(szNum, "%d", num_rules + 1);
 		list_rules.InsertItem(num_rules, "");
@@ -204,6 +200,8 @@ void Shell::RefreshEditRule() {
 		list_rules.SetItemText(num_rules, 2, _rule);
 		num_rules++;
 	}
+	pLogin->Client_SendMessage((PVOID)&command_msg);
+
 	ruleFile.Close();
 
 }
