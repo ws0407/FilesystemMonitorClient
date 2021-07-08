@@ -7,6 +7,7 @@
 #include <string>
 #include <time.h>
 #include "Shell.h"
+#include <thread>
 #include <WinSock2.h>
 #pragma comment(lib, "ws2_32.lib")
 
@@ -59,9 +60,12 @@ public:
 	afx_msg void OnBnClickedCancel();
 	CListCtrl list_record;
 	OperationInfo records[1024];
+	int num_records;
+	bool is_start;
 		
 
 	afx_msg void OnShell();
 	afx_msg void OnStop();
 	afx_msg void OnStart();
+
 };
