@@ -12,11 +12,11 @@
 #define IDR_MENU2                       133
 #define IDC_LIST_RECORD                 1002
 #define IDC_EDIT_RULE                   1003
-#define IDC_LIST1                       1004
 #define IDC_LIST_RULES                  1004
 #define IDC_STATIC_TITLE                1005
 #define IDC_STATIC_NEW                  1006
 #define IDC_EDIT_TITLE                  1007
+#define IDC_BUTTON_REFRESH              1008
 #define ID_32771                        32771
 #define ID_32772                        32772
 #define ID_32773                        32773
@@ -51,7 +51,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32798
-#define _APS_NEXT_CONTROL_VALUE         1006
+#define _APS_NEXT_CONTROL_VALUE         1009
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -84,6 +84,8 @@ BEGIN_MESSAGE_MAP(CFilesystemMonitorClientDlg, CDialogEx)
 	ON_COMMAND(ID_SHELL, &CFilesystemMonitorClientDlg::OnShell)
 	ON_COMMAND(ID_STOP, &CFilesystemMonitorClientDlg::OnStop)
 	ON_COMMAND(ID_START, &CFilesystemMonitorClientDlg::OnStart)
+	ON_COMMAND(ID_EXIT, &CFilesystemMonitorClientDlg::OnExit)
+	ON_COMMAND(ID_SAVE, &CFilesystemMonitorClientDlg::OnSave)
 END_MESSAGE_MAP()
 
 
@@ -144,8 +146,6 @@ BOOL CFilesystemMonitorClientDlg::OnInitDialog()
 	list_record.InsertColumn(3, _T("用户"), LVCFMT_CENTER, rt.Width() / 10, 1);
 	list_record.InsertColumn(4, _T("进程"), LVCFMT_CENTER, rt.Width() / 8, 1);
 	list_record.InsertColumn(5, _T("时间"), LVCFMT_CENTER, rt.Width() / 5.5, 1);
-	
-	// TODO: 在此添加额外的初始化代码
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -291,18 +291,15 @@ void thread01() {
 		Sleep(200);
 		char szNum[16] = {};
 
-		int row = pLogin->num_records > 100 ? 100 : pLogin->num_records;
-		sprintf(szNum, "%d", pLogin->num_records);
+		int row = pLogin->num_records > 1024 ? 1024 : pLogin->num_records;
+		sprintf(szNum, "%d", (pLogin->num_records) + 1);
 
-		if (pLogin->num_records > 100) {
+		if (pLogin->num_records > 1024) {
 			pLogin->list_record.DeleteItem(0);
 		}
 		pLogin->list_record.InsertItem(row, "");
-
 		pLogin->list_record.SetItemText(row, 0, szNum);
-
-		sprintf(szNum, "%d", message.operation_type);
-		pLogin->list_record.SetItemText(row, 1, szNum);
+		pLogin->list_record.SetItemText(row, 1, message.operation_type == 1 ? "Create" : "Write");
 		pLogin->list_record.SetItemText(row, 2, message.path);
 		pLogin->list_record.SetItemText(row, 3, message.user);
 		pLogin->list_record.SetItemText(row, 4, message.process);
@@ -323,3 +320,19 @@ void thread01() {
 
 }
 
+
+void CFilesystemMonitorClientDlg::OnExit()
+{
+	// TODO: 在此添加命令处理程序代码
+	CDialogEx::OnCancel();
+}
+
+
+void CFilesystemMonitorClientDlg::OnSave()
+{
+	// TODO: 在此添加命令处理程序代码
+	if (list_record.GetItemCount() <= 0) {
+		MessageBox("列表中没有记录需要保存", "提示", MB_ICONWARNING | MB_OK);
+		return;
+	}
+}

@@ -24,7 +24,7 @@ Shell::~Shell()
 void Shell::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LIST1, list_rules);
+	DDX_Control(pDX, IDC_LIST_RULES, list_rules);
 	DDX_Control(pDX, IDC_EDIT_TITLE, rule_title);
 	DDX_Control(pDX, IDC_EDIT_RULE, rule);
 }
@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(Shell, CDialogEx)
 	ON_COMMAND(ID_LINK_DETAIL, &Shell::OnLinkDetail)
 	ON_COMMAND(ID_LINK_MODIFY, &Shell::OnLinkModify)
 	ON_COMMAND(ID_LINK_DELETE, &Shell::OnLinkDelete)
+	ON_BN_CLICKED(IDC_BUTTON_REFRESH, &Shell::OnBnClickedButtonRefresh)
 END_MESSAGE_MAP()
 
 
@@ -92,6 +93,12 @@ BOOL Shell::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
+	// 设置字体
+
+	font.CreatePointFont(150, "");
+
+	GetDlgItem(IDC_STATIC_TITLE)->SetFont(&font);
+	// 
 	//添加列表信息
 	CRect rt;
 	GetClientRect(&rt);
@@ -220,4 +227,11 @@ void Shell::OnLinkDelete()
 
 	RefreshEditRule();
 	MessageBox("规则已成功删除！", "提示", MB_ICONINFORMATION | MB_OK);
+}
+
+
+void Shell::OnBnClickedButtonRefresh()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	RefreshEditRule();
 }

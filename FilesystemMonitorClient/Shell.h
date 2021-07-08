@@ -21,6 +21,9 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
+	CFont font;
+	CBrush brush;
+	CImageList m_IconList;
 
 	DECLARE_MESSAGE_MAP()
 public:
@@ -46,4 +49,5 @@ public:
 	afx_msg void OnLinkDetail();
 	afx_msg void OnLinkModify();
 	afx_msg void OnLinkDelete();
+	afx_msg void OnBnClickedButtonRefresh();
 };

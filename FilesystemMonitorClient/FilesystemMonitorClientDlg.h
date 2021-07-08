@@ -10,6 +10,7 @@
 #include <thread>
 #include <WinSock2.h>
 #include <fltUser.h>
+#include <afxdb.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -26,10 +27,10 @@ typedef int (*pInitiaCommunicationPort)();
 
 
 typedef enum _MINI_COMMAND {
-	ENUM_PASS = 0,
-	ENUM_BLOCK
+	ENUM_BLOCK = 0,
+	ENUM_PASS,
+	ENUM_RULE
 }MIN_COMMAND;
-
 
 
 typedef struct {
@@ -61,7 +62,6 @@ public:
 protected:
 	HICON m_hIcon;
 	CFont font;
-	CBrush brush;
 	CImageList m_IconList;
 
 	// 生成的消息映射函数
@@ -82,6 +82,8 @@ public:
 	afx_msg void OnShell();
 	afx_msg void OnStop();
 	afx_msg void OnStart();
+	afx_msg void OnExit();
+	afx_msg void OnSave();
 
 };
 
