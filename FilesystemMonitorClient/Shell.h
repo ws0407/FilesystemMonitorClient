@@ -25,4 +25,13 @@ public:
 	afx_msg void OnBnClickedCancel();
 	CEdit edit_cmd;
 
+	afx_msg void OnStnClickedStaticNew();
+	CListCtrl list_rules;
+	CEdit rule_title;
+	CEdit rule;
+	afx_msg void OnStnClickedStaticTitle();
+	afx_msg void OnNMRClickListRules(NMHDR* pNMHDR, LRESULT* pResult);
+	virtual BOOL OnInitDialog();
+	afx_msg void OnEnSetfocusEditTitle();
+	afx_msg void OnEnSetfocusEditRule();
 };

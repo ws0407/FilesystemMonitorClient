@@ -216,7 +216,7 @@ void CFilesystemMonitorClientDlg::OnBnClickedCancel()
 void CFilesystemMonitorClientDlg::OnShell()
 {
 	// TODO: 在此添加命令处理程序代码
-	OnBnClickedOk();
+	// OnBnClickedOk();
 
 
 	INT_PTR nRes;
