@@ -97,6 +97,7 @@ BOOL CFilesystemMonitorClientDlg::OnInitDialog()
 	}
 
 	Client_SendMessage = (pGetMessage)GetProcAddress(m_hModule, "NPSendMessage");
+	Client_GetMessage = (pGetMessage)GetProcAddress(m_hModule, "NPGetMessage");
 
 	pLogin = this;
 
@@ -200,15 +201,8 @@ void CFilesystemMonitorClientDlg::OnBnClickedOk()
 	CString text;
 	GetDlgItem(IDOK)->GetWindowText(text);
 	if (text == "开始") {
-		pLogin->Client_GetMessage = (pGetMessage)GetProcAddress(pLogin->m_hModule, "NPGetMessage");
-		DWORD hResult = 0;
-		Sleep(2000);
-		hResult = pLogin->Client_GetMessage(&(data_get));
-		if (hResult != S_OK)
-		{
-			MessageBox("驱动服务未开启！", "提示", MB_ICONINFORMATION | MB_OK);
-			return;
-		}
+		
+		
 		is_start = true;
 		GetDlgItem(IDOK)->SetWindowText("暂停");
 		
@@ -283,25 +277,24 @@ void CFilesystemMonitorClientDlg::OnStart()
 void thread01() {
 	// 接受message，传递信息
 
-	pLogin->Client_GetMessage = (pGetMessage)GetProcAddress(pLogin->m_hModule, "NPGetMessage");
 	DWORD hResult = 0;
-	hResult = pLogin->Client_GetMessage(&(data_get));
-	if (hResult != S_OK)
 	{
-		printf("get message error");
-	}
-	else
-	{
-		OperationInfo message;
-		CString filePath = "log\\log.txt";
-		message.operation_type = data_get.info.operation_type;
-		strcpy(message.path, data_get.info.path);
-		strcpy(message.process, data_get.info.process);
-		strcpy(message.time, data_get.info.time);
-		strcpy(message.user, data_get.info.user);
-
 		while (pLogin->is_start) {
-			Sleep(200);
+			hResult = pLogin->Client_GetMessage(&(data_get));
+			if (hResult != S_OK)
+			{
+				MessageBox(NULL, "未收到数据", "提示", MB_OK);
+				
+				break;
+			}
+			OperationInfo message;
+			CString filePath = "log\\log.txt";
+			message.operation_type = data_get.info.operation_type;
+			strcpy(message.path, data_get.info.path);
+			strcpy(message.process, data_get.info.process);
+			strcpy(message.time, data_get.info.time);
+			strcpy(message.user, data_get.info.user);
+			
 			char szNum[16] = {};
 
 			int row = pLogin->num_records > 1024 ? 1024 : pLogin->num_records;
