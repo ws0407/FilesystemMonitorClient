@@ -279,6 +279,8 @@ void thread01() {
 
 	DWORD hResult = 0;
 	{
+		CString filePath = "log\\log.txt";
+		CFile logFile(_T(filePath), CFile::modeCreate | CFile::modeWrite | CFile::modeNoTruncate);
 		while (pLogin->is_start) {
 			hResult = pLogin->Client_GetMessage(&(data_get));
 			if (hResult != S_OK)
@@ -288,7 +290,6 @@ void thread01() {
 				break;
 			}
 			OperationInfo message;
-			CString filePath = "log\\log.txt";
 			message.operation_type = data_get.info.operation_type;
 			strcpy(message.path, data_get.info.path);
 			message.process_id = data_get.info.process_id;
@@ -313,8 +314,6 @@ void thread01() {
 			pLogin->list_record.SetItemText(row, 5, message.time);
 			pLogin->list_record.EnsureVisible(pLogin->list_record.GetItemCount() - 1, false);
 			(pLogin->num_records)++;
-
-			CFile logFile(_T(filePath), CFile::modeCreate | CFile::modeWrite | CFile::modeNoTruncate);
 			char logMessage[1024] = { "\0" };
 
 			sprintf(logMessage, "%d\t%d\t%s\t%s\t%d\t%s\n", pLogin->num_records,
@@ -322,8 +321,9 @@ void thread01() {
 
 			logFile.SeekToEnd();
 			logFile.Write(logMessage, strlen(logMessage));
-			logFile.Close();
 		}
+		logFile.Close();
+
 	}
 
 }
