@@ -291,7 +291,7 @@ void thread01() {
 			CString filePath = "log\\log.txt";
 			message.operation_type = data_get.info.operation_type;
 			strcpy(message.path, data_get.info.path);
-			strcpy(message.process, data_get.info.process);
+			message.process_id = data_get.info.process_id;
 			strcpy(message.time, data_get.info.time);
 			strcpy(message.user, data_get.info.user);
 			
@@ -308,7 +308,8 @@ void thread01() {
 			pLogin->list_record.SetItemText(row, 1, message.operation_type == 1 ? "Create" : "Write");
 			pLogin->list_record.SetItemText(row, 2, message.path);
 			pLogin->list_record.SetItemText(row, 3, message.user);
-			pLogin->list_record.SetItemText(row, 4, message.process);
+			sprintf(szNum, "%d", data_get.info.process_id);
+			pLogin->list_record.SetItemText(row, 4, szNum);
 			pLogin->list_record.SetItemText(row, 5, message.time);
 			pLogin->list_record.EnsureVisible(pLogin->list_record.GetItemCount() - 1, false);
 			(pLogin->num_records)++;
@@ -316,8 +317,8 @@ void thread01() {
 			CFile logFile(_T(filePath), CFile::modeCreate | CFile::modeWrite | CFile::modeNoTruncate);
 			char logMessage[1024] = { "\0" };
 
-			sprintf(logMessage, "%d\t%d\t%s\t%s\t%s\t%s\n", pLogin->num_records,
-				message.operation_type, message.user, message.path, message.process, message.time);
+			sprintf(logMessage, "%d\t%d\t%s\t%s\t%d\t%s\n", pLogin->num_records,
+				message.operation_type, message.user, message.path, message.process_id, message.time);
 
 			logFile.SeekToEnd();
 			logFile.Write(logMessage, strlen(logMessage));

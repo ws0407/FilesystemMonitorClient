@@ -40,8 +40,8 @@ typedef struct Rule
 typedef struct {
 	char time[32];
 	short operation_type;
-	char user[32];
-	char process[32];
+	char user[256];
+	int process_id;
 	char path[256];
 } OperationInfo;
 
