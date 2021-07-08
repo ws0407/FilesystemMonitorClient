@@ -9,6 +9,8 @@
 #include "Shell.h"
 #include <thread>
 #include <WinSock2.h>
+#include <fltUser.h>
+
 #pragma comment(lib, "ws2_32.lib")
 
 #pragma once
@@ -16,6 +18,14 @@
 #define MAX_RECORD 1024
 #define MAX_FILENAME_LEN 128
 #define Bufsize 1024
+
+
+typedef int (*pSendMessage)(PVOID pInBufffer);
+typedef int (*pGetMessage)(PVOID pInBufffer);
+typedef int (*pInitiaCommunicationPort)();
+
+
+
 
 typedef struct {
 	char time[32];
@@ -69,3 +79,12 @@ public:
 	afx_msg void OnStart();
 
 };
+
+typedef struct _SCANNER_MESSAGE
+{
+	FILTER_MESSAGE_HEADER MessageHeader;
+
+	OperationInfo info;
+
+	OVERLAPPED Ovlp;
+} SCANNER_MESSAGE, * PSCANNER_MESSAGE;

@@ -8,11 +8,16 @@
 #include "FilesystemMonitorClientDlg.h"
 #include "afxdialogex.h"
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 using namespace std;
+SCANNER_MESSAGE data_get;
+HINSTANCE m_hModule;
+pInitiaCommunicationPort pInit;
+
 
 CFilesystemMonitorClientDlg* pLogin;	//定义一个全局变量，用于向另外的对话框传递信息
 void thread01();
@@ -84,6 +89,12 @@ END_MESSAGE_MAP()
 BOOL CFilesystemMonitorClientDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	m_hModule = LoadLibrary("UserDll-1.dll");
+	if (m_hModule == NULL)
+	{
+		MessageBox("缺少UserDLL-1.dll");
+	}
 
 	pLogin = this;
 
@@ -249,14 +260,25 @@ void CFilesystemMonitorClientDlg::OnStart()
 
 void thread01() {
 	// 接受message，传递信息
-	printf("I'm here!!");
-	CString filePath = "log\\log.txt";
+
+	pGetMessage recv = (pGetMessage)GetProcAddress(m_hModule, "NPGetMessage");
 	OperationInfo message;
-	message.operation_type = 1;
-	strcpy(message.path, "C:\\Users\\王硕\\test.txt");
-	strcpy(message.process, "notepad.exe");
-	strcpy(message.time, "2021/7/7 23:40:30");
-	strcpy(message.user, "administrator");
+	CString filePath = "log\\log.txt";
+
+	DWORD hResult = 0;
+	hResult = recv(&data_get);
+	if (hResult != S_OK)
+	{
+		printf("get message error");
+	}
+	else
+	{
+		message.operation_type = data_get.info.operation_type;
+		strcpy(message.path, data_get.info.path);
+		strcpy(message.process, data_get.info.process);
+		strcpy(message.time, data_get.info.time);
+		strcpy(message.user, data_get.info.user);
+	}
 
 	while (pLogin->is_start) {
 		Sleep(200);
@@ -293,5 +315,4 @@ void thread01() {
 	}
 
 }
-
 
