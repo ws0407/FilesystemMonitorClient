@@ -278,51 +278,62 @@ void thread01() {
 	// 接受message，传递信息
 
 	DWORD hResult = 0;
-	{
-		CString filePath = "log\\log.txt";
-		CFile logFile(_T(filePath), CFile::modeCreate | CFile::modeWrite | CFile::modeNoTruncate);
-		while (pLogin->is_start) {
-			hResult = pLogin->Client_GetMessage(&(data_get));
-			if (hResult != S_OK)
-			{
-				MessageBox(NULL, "未收到数据", "提示", MB_OK);
-				
-				break;
-			}
-			OperationInfo message;
-			message.operation_type = data_get.info.operation_type;
-			strcpy(message.path, data_get.info.path);
-			message.process_id = data_get.info.process_id;
-			strcpy(message.time, data_get.info.time);
-			strcpy(message.user, data_get.info.user);
-			
-			char szNum[16] = {};
-
-			int row = pLogin->num_records > 1024 ? 1024 : pLogin->num_records;
-			sprintf(szNum, "%d", (pLogin->num_records) + 1);
-
-			if (pLogin->num_records > 1024) {
-				pLogin->list_record.DeleteItem(0);
-			}
-			pLogin->list_record.InsertItem(row, "");
-			pLogin->list_record.SetItemText(row, 0, szNum);
-			pLogin->list_record.SetItemText(row, 1, message.operation_type == 1 ? "Create" : "Write");
-			pLogin->list_record.SetItemText(row, 2, message.path);
-			pLogin->list_record.SetItemText(row, 3, message.user);
-			sprintf(szNum, "%d", data_get.info.process_id);
-			pLogin->list_record.SetItemText(row, 4, szNum);
-			pLogin->list_record.SetItemText(row, 5, message.time);
-			pLogin->list_record.EnsureVisible(pLogin->list_record.GetItemCount() - 1, false);
-			(pLogin->num_records)++;
-			char logMessage[1024] = { "\0" };
-
-			sprintf(logMessage, "%d\t%d\t%s\t%s\t%d\t%s\n", pLogin->num_records,
-				message.operation_type, message.user, message.path, message.process_id, message.time);
-
-			logFile.SeekToEnd();
-			logFile.Write(logMessage, strlen(logMessage));
+	while (pLogin->is_start) {
+		hResult = pLogin->Client_GetMessage(&(data_get));
+		if (hResult != S_OK)
+		{
+			continue;
 		}
-		logFile.Close();
+			
+		OperationInfo message;
+		message.operation_type = data_get.info.operation_type;
+		strcpy(message.path, data_get.info.path);
+		message.process_id = data_get.info.process_id;
+		strcpy(message.time, data_get.info.time);
+		strcpy(message.user, data_get.info.user);
+			
+		pLogin->records[(pLogin->num_records) % 1000] = message;
+
+		char szNum[16] = {};
+
+		int row = pLogin->num_records > 1024 ? 1024 : pLogin->num_records;
+		sprintf(szNum, "%d", (pLogin->num_records) + 1);
+
+		if (pLogin->num_records > 1024) {
+			pLogin->list_record.DeleteItem(0);
+		}
+		pLogin->list_record.InsertItem(row, "");
+		pLogin->list_record.SetItemText(row, 0, szNum);
+		pLogin->list_record.SetItemText(row, 1, message.operation_type == 1 ? "Create" : "Write");
+		pLogin->list_record.SetItemText(row, 2, message.path);
+		pLogin->list_record.SetItemText(row, 3, message.user);
+		sprintf(szNum, "%d", data_get.info.process_id);
+		pLogin->list_record.SetItemText(row, 4, szNum);
+		pLogin->list_record.SetItemText(row, 5, message.time);
+		pLogin->list_record.EnsureVisible(pLogin->list_record.GetItemCount() - 1, false);
+		(pLogin->num_records)++;
+
+		if (pLogin->num_records % 1000 == 0) {
+			CTime time;
+			time = CTime::GetCurrentTime();
+			CString sTime = time.Format("%H-%M-%S");
+
+			CString filePath = "log\\" + sTime + ".txt";
+			CFile logFile(_T(filePath), CFile::modeCreate | CFile::modeWrite | CFile::modeNoTruncate);
+			char logMessage[1024] = { "\0" };
+			for (int i = 0; i < 1000; i++) {
+				sprintf(logMessage, "%d\t%s\t%s\t%d\t%s\n",
+					pLogin->records[i].operation_type, pLogin->records[i].user, pLogin->records[i].path,
+					pLogin->records[i].process_id, pLogin->records[i].time);
+
+				logFile.SeekToEnd();
+				logFile.Write(logMessage, strlen(logMessage));
+			}
+							
+			logFile.Close();
+		}
+
+			
 
 	}
 
