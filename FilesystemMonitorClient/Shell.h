@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include <vector>
+using namespace std;
+
 
 // Shell 对话框
 
@@ -29,9 +32,18 @@ public:
 	CListCtrl list_rules;
 	CEdit rule_title;
 	CEdit rule;
+	int num_rules;
+
+	vector<int> rules;
+
 	afx_msg void OnStnClickedStaticTitle();
 	afx_msg void OnNMRClickListRules(NMHDR* pNMHDR, LRESULT* pResult);
 	virtual BOOL OnInitDialog();
 	afx_msg void OnEnSetfocusEditTitle();
 	afx_msg void OnEnSetfocusEditRule();
+
+	afx_msg void RefreshEditRule();
+	afx_msg void OnLinkDetail();
+	afx_msg void OnLinkModify();
+	afx_msg void OnLinkDelete();
 };
