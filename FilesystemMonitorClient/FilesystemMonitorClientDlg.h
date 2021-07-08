@@ -6,7 +6,6 @@
 #include <stdarg.h>
 #include <string>
 #include <time.h>
-#include "Shell.h"
 #include <thread>
 #include <WinSock2.h>
 #include <fltUser.h>
@@ -26,12 +25,17 @@ typedef int (*pGetMessage)(PVOID pInBufffer);
 typedef int (*pInitiaCommunicationPort)();
 
 
-typedef enum _MINI_COMMAND {
+typedef enum {
 	ENUM_BLOCK = 0,
 	ENUM_PASS,
 	ENUM_RULE
-}MIN_COMMAND;
+}_MINI_COMMAND;
 
+typedef struct Rule
+{
+	char user[256];
+	char path[256];
+}Rule;
 
 typedef struct {
 	char time[32];
@@ -40,6 +44,11 @@ typedef struct {
 	char process[32];
 	char path[256];
 } OperationInfo;
+
+typedef struct _COMMAND_MESSAGE {
+	_MINI_COMMAND Command;
+	Rule rules[5];
+} COMMAND_MESSAGE, * PCOMMAND_MESSAGE;
 
 
 // CFilesystemMonitorClientDlg 对话框
@@ -77,6 +86,10 @@ public:
 	OperationInfo records[1024];
 	int num_records;
 	bool is_start;
+	HINSTANCE m_hModule;
+	pInitiaCommunicationPort pInit = NULL;
+	pSendMessage Client_SendMessage = NULL;
+	pGetMessage Client_GetMessage = NULL;
 		
 
 	afx_msg void OnShell();

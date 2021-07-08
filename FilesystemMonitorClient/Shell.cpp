@@ -6,6 +6,7 @@
 #include "Shell.h"
 #include "afxdialogex.h"
 
+extern CFilesystemMonitorClientDlg* pLogin;
 
 // Shell 对话框
 
@@ -112,7 +113,7 @@ BOOL Shell::OnInitDialog()
 	rule.SetWindowTextA("规则内容");
 
 	num_rules = 0;
-
+	
 	RefreshEditRule();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -171,12 +172,30 @@ void Shell::RefreshEditRule() {
 	ruleFile.Open(rulePath, CFile::modeRead);
 
 	ruleFile.SeekToBegin();
+
+	COMMAND_MESSAGE command_msg;
+	for (int i = 0; i < 5; i++) {
+		memset(command_msg.rules[i].path, '\0', 256);
+		memset(command_msg.rules[i].user, '\0', 256);
+	}
+
+	command_msg.Command = ENUM_RULE;
 	while (ruleFile.ReadString(rules_str)) {
 		
 		int index = rules_str.Find(" ");
 		CString _title = rules_str.Left(index);
 		// MessageBox(_title);
 		CString _rule = rules_str.Right(rules_str.GetLength() - index);
+
+		CString _user = _rule.Left(_rule.Find(" "));
+		CString _path = _rule.Right(_rule.GetLength() -_rule.Find(" "));
+		strcpy(command_msg.rules[num_rules].user, _user);
+		_path.Replace("C:", "\\Device\\HarddiskVolume");
+		_path.Replace("/", "\\");
+		strcpy(command_msg.rules[num_rules].path, _path);
+
+		pLogin->Client_SendMessage((PVOID)&command_msg);
+		
 		char szNum[32] = { '\0' };
 		sprintf(szNum, "%d", num_rules + 1);
 		list_rules.InsertItem(num_rules, "");

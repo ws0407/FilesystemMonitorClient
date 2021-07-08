@@ -1,7 +1,11 @@
 ﻿#pragma once
+#include "FilesystemMonitorClientDlg.h"
 
 #include <vector>
 using namespace std;
+
+typedef int (*pSendMessage)(PVOID pInBufffer);
+typedef int (*pGetMessage)(PVOID pInBufffer);
 
 
 // Shell 对话框
@@ -36,6 +40,7 @@ public:
 	CEdit rule_title;
 	CEdit rule;
 	int num_rules;
+	
 
 	vector<int> rules;
 

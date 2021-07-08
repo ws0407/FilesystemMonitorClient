@@ -4,6 +4,7 @@
 
 #include "pch.h"
 #include "framework.h"
+#include "Shell.h"
 #include "FilesystemMonitorClient.h"
 #include "FilesystemMonitorClientDlg.h"
 #include "afxdialogex.h"
@@ -14,14 +15,8 @@
 #endif
 
 using namespace std;
+
 SCANNER_MESSAGE data_get;
-HINSTANCE m_hModule;
-pInitiaCommunicationPort pInit = NULL;
-pSendMessage Client_SendMessage = NULL;
-pGetMessage Client_GetMessage = NULL;
-
-
-
 CFilesystemMonitorClientDlg* pLogin;	//定义一个全局变量，用于向另外的对话框传递信息
 void thread01();
 
@@ -205,10 +200,25 @@ void CFilesystemMonitorClientDlg::OnBnClickedOk()
 	CString text;
 	GetDlgItem(IDOK)->GetWindowText(text);
 	if (text == "开始") {
+		pLogin->Client_GetMessage = (pGetMessage)GetProcAddress(pLogin->m_hModule, "NPGetMessage");
+		DWORD hResult = 0;
+		Sleep(2000);
+		hResult = pLogin->Client_GetMessage(&(data_get));
+		if (hResult != S_OK)
+		{
+			MessageBox("驱动服务未开启！", "提示", MB_ICONINFORMATION | MB_OK);
+			return;
+		}
 		is_start = true;
 		GetDlgItem(IDOK)->SetWindowText("暂停");
-
-		Client_SendMessage((PVOID)ENUM_PASS);
+		
+		COMMAND_MESSAGE command_pass;
+		for (int i = 0; i < 5; i++) {
+			memset(command_pass.rules[i].path, '\0', 256);
+			memset(command_pass.rules[i].user, '\0', 256);
+		}
+		command_pass.Command = ENUM_PASS;
+		Client_SendMessage((PVOID)&command_pass);
 
 		// list_record.DeleteAllItems();
 		// 写开始的操作
@@ -217,7 +227,13 @@ void CFilesystemMonitorClientDlg::OnBnClickedOk()
 	}
 	else if (text == "暂停") {
 		// 写暂停的操作
-		Client_SendMessage((PVOID)ENUM_BLOCK);
+		COMMAND_MESSAGE command_block;
+		for (int i = 0; i < 5; i++) {
+			memset(command_block.rules[i].path, '\0', 256);
+			memset(command_block.rules[i].user, '\0', 256);
+		}
+		command_block.Command = ENUM_BLOCK;	
+		Client_SendMessage((PVOID)&command_block);
 		is_start = false;
 		GetDlgItem(IDOK)->SetWindowText("开始");
 	}
@@ -235,7 +251,6 @@ void CFilesystemMonitorClientDlg::OnShell()
 {
 	// TODO: 在此添加命令处理程序代码
 	// OnBnClickedOk();
-
 
 	INT_PTR nRes;
 	Shell myDlg;
@@ -268,54 +283,53 @@ void CFilesystemMonitorClientDlg::OnStart()
 void thread01() {
 	// 接受message，传递信息
 
-	Client_GetMessage = (pGetMessage)GetProcAddress(m_hModule, "NPGetMessage");
-	OperationInfo message;
-	CString filePath = "log\\log.txt";
-
+	pLogin->Client_GetMessage = (pGetMessage)GetProcAddress(pLogin->m_hModule, "NPGetMessage");
 	DWORD hResult = 0;
-	hResult = Client_GetMessage(&data_get);
+	hResult = pLogin->Client_GetMessage(&(data_get));
 	if (hResult != S_OK)
 	{
 		printf("get message error");
 	}
 	else
 	{
+		OperationInfo message;
+		CString filePath = "log\\log.txt";
 		message.operation_type = data_get.info.operation_type;
 		strcpy(message.path, data_get.info.path);
 		strcpy(message.process, data_get.info.process);
 		strcpy(message.time, data_get.info.time);
 		strcpy(message.user, data_get.info.user);
-	}
 
-	while (pLogin->is_start) {
-		Sleep(200);
-		char szNum[16] = {};
+		while (pLogin->is_start) {
+			Sleep(200);
+			char szNum[16] = {};
 
-		int row = pLogin->num_records > 1024 ? 1024 : pLogin->num_records;
-		sprintf(szNum, "%d", (pLogin->num_records) + 1);
+			int row = pLogin->num_records > 1024 ? 1024 : pLogin->num_records;
+			sprintf(szNum, "%d", (pLogin->num_records) + 1);
 
-		if (pLogin->num_records > 1024) {
-			pLogin->list_record.DeleteItem(0);
+			if (pLogin->num_records > 1024) {
+				pLogin->list_record.DeleteItem(0);
+			}
+			pLogin->list_record.InsertItem(row, "");
+			pLogin->list_record.SetItemText(row, 0, szNum);
+			pLogin->list_record.SetItemText(row, 1, message.operation_type == 1 ? "Create" : "Write");
+			pLogin->list_record.SetItemText(row, 2, message.path);
+			pLogin->list_record.SetItemText(row, 3, message.user);
+			pLogin->list_record.SetItemText(row, 4, message.process);
+			pLogin->list_record.SetItemText(row, 5, message.time);
+			pLogin->list_record.EnsureVisible(pLogin->list_record.GetItemCount() - 1, false);
+			(pLogin->num_records)++;
+
+			CFile logFile(_T(filePath), CFile::modeCreate | CFile::modeWrite | CFile::modeNoTruncate);
+			char logMessage[1024] = { "\0" };
+
+			sprintf(logMessage, "%d\t%d\t%s\t%s\t%s\t%s\n", pLogin->num_records,
+				message.operation_type, message.user, message.path, message.process, message.time);
+
+			logFile.SeekToEnd();
+			logFile.Write(logMessage, strlen(logMessage));
+			logFile.Close();
 		}
-		pLogin->list_record.InsertItem(row, "");
-		pLogin->list_record.SetItemText(row, 0, szNum);
-		pLogin->list_record.SetItemText(row, 1, message.operation_type == 1 ? "Create" : "Write");
-		pLogin->list_record.SetItemText(row, 2, message.path);
-		pLogin->list_record.SetItemText(row, 3, message.user);
-		pLogin->list_record.SetItemText(row, 4, message.process);
-		pLogin->list_record.SetItemText(row, 5, message.time);
-		pLogin->list_record.EnsureVisible(pLogin->list_record.GetItemCount() - 1, false);
-		(pLogin->num_records)++;
-
-		CFile logFile(_T(filePath), CFile::modeCreate | CFile::modeWrite | CFile::modeNoTruncate);
-		char logMessage[1024] = { "\0" };
-
-		sprintf(logMessage, "%d\t%d\t%s\t%s\t%s\t%s\n", pLogin->num_records,
-			message.operation_type, message.user, message.path, message.process, message.time);
-
-		logFile.SeekToEnd();
-		logFile.Write(logMessage, strlen(logMessage));
-		logFile.Close();
 	}
 
 }
