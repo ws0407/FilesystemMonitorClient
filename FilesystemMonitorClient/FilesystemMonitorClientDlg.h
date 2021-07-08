@@ -25,6 +25,11 @@ typedef int (*pGetMessage)(PVOID pInBufffer);
 typedef int (*pInitiaCommunicationPort)();
 
 
+typedef enum _MINI_COMMAND {
+	ENUM_PASS = 0,
+	ENUM_BLOCK
+}MIN_COMMAND;
+
 
 
 typedef struct {

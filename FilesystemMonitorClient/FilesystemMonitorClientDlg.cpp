@@ -16,7 +16,10 @@
 using namespace std;
 SCANNER_MESSAGE data_get;
 HINSTANCE m_hModule;
-pInitiaCommunicationPort pInit;
+pInitiaCommunicationPort pInit = NULL;
+pSendMessage Client_SendMessage = NULL;
+pGetMessage Client_GetMessage = NULL;
+
 
 
 CFilesystemMonitorClientDlg* pLogin;	//定义一个全局变量，用于向另外的对话框传递信息
@@ -95,6 +98,8 @@ BOOL CFilesystemMonitorClientDlg::OnInitDialog()
 	{
 		MessageBox("缺少UserDLL-1.dll");
 	}
+
+	Client_SendMessage = (pGetMessage)GetProcAddress(m_hModule, "NPSendMessage");
 
 	pLogin = this;
 
@@ -203,6 +208,8 @@ void CFilesystemMonitorClientDlg::OnBnClickedOk()
 		is_start = true;
 		GetDlgItem(IDOK)->SetWindowText("暂停");
 
+		Client_SendMessage((PVOID)ENUM_PASS);
+
 		// list_record.DeleteAllItems();
 		// 写开始的操作
 		thread task01(thread01);
@@ -210,7 +217,7 @@ void CFilesystemMonitorClientDlg::OnBnClickedOk()
 	}
 	else if (text == "暂停") {
 		// 写暂停的操作
-
+		Client_SendMessage((PVOID)ENUM_BLOCK);
 		is_start = false;
 		GetDlgItem(IDOK)->SetWindowText("开始");
 	}
@@ -261,12 +268,12 @@ void CFilesystemMonitorClientDlg::OnStart()
 void thread01() {
 	// 接受message，传递信息
 
-	pGetMessage recv = (pGetMessage)GetProcAddress(m_hModule, "NPGetMessage");
+	Client_GetMessage = (pGetMessage)GetProcAddress(m_hModule, "NPGetMessage");
 	OperationInfo message;
 	CString filePath = "log\\log.txt";
 
 	DWORD hResult = 0;
-	hResult = recv(&data_get);
+	hResult = Client_GetMessage(&data_get);
 	if (hResult != S_OK)
 	{
 		printf("get message error");
